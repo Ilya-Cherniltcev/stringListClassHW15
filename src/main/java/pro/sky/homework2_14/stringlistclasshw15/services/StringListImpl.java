@@ -46,9 +46,7 @@ public class StringListImpl implements StringList {
     // выбросить исключение.  Вернуть добавленный элемент в качестве результата выполнения.
     @Override
     public String add(int index, String item) {
-        if (index < 0 || index > strList.length) {
-            throw new IndexOutOfArrayException("Out of range");
-        }
+        validateIndex(index);
         if (strList.length == 0) {
             strList = new String[1];
             strList[index] = item;
@@ -81,11 +79,9 @@ public class StringListImpl implements StringList {
     // фактического количества элементов или выходит за пределы массива.
     @Override
     public String set(int index, String item) {
-        try {
-            strList[index] = item;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IndexOutOfArrayException("Out of range");
-        }
+        validateEmptyArray();
+        validateIndex(index);
+        strList[index] = item;
         return item;
     }
 
@@ -93,9 +89,7 @@ public class StringListImpl implements StringList {
     // или исключение, если подобный  элемент отсутствует в списке.
     @Override
     public String remove(String item) {
-        if (strList.length == 0) {
-            throw new EmptyArrayException("Array is empty");
-        }
+        validateEmptyArray();
         for (int i = 0; i < strList.length; i++) {
             if (strList[i].equals(item)) {
                 String tempStr = remove(i);
@@ -109,9 +103,8 @@ public class StringListImpl implements StringList {
     // или исключение, если подобный  элемент отсутствует в списке.
     @Override
     public String remove(int index) {
-        if (index < 0 || index > strList.length || strList.length == 0) {
-            throw new IndexOutOfArrayException("Out of range");
-        }
+        validateEmptyArray();
+        validateIndex(index);
         String item = strList[index];
         length--;
         // ***************** если удаляемый элемент на 0 позиции ********
@@ -136,6 +129,7 @@ public class StringListImpl implements StringList {
     // Проверка на существование элемента.  Вернуть true/false;
     @Override
     public boolean contains(String item) {
+        validateEmptyArray();
         boolean isExist = false;
         for (String existStr : strList) {
             if (existStr.equals(item)) {
@@ -156,6 +150,7 @@ public class StringListImpl implements StringList {
     // или -1 в случае отсутствия.
     @Override
     public int indexOf(String item) {
+        validateEmptyArray();
         int isExistIndex = -1;
         for (int i = 0; i < strList.length; i++) {
             if (strList[i].equals(item)) {
@@ -171,10 +166,12 @@ public class StringListImpl implements StringList {
     // или -1 в случае отсутствия.
     @Override
     public int lastIndexOf(String item) {
+        validateEmptyArray();
         int isExistIndex = -1;
-        for (int i = 0; i < strList.length; i++) {
+        for (int i = strList.length - 1; i >= 0; i--) {
             if (strList[i].equals(item)) {
                 isExistIndex = i;
+                break;
             }
         }
         return isExistIndex;
@@ -184,21 +181,18 @@ public class StringListImpl implements StringList {
     // если выходит за рамки фактического  количества элементов.
     @Override
     public String get(int index) {
-        try {
-            String item = strList[index];
-            return item;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IndexOutOfArrayException("Out of range");
-        }
+        validateEmptyArray();
+        validateIndex(index);
+        String item = strList[index];
+        return item;
     }
+
 
     // Сравнить текущий список с другим.  Вернуть true/false или исключение,
     // если передан null.
     @Override
     public boolean equals(StringList otherList) {
-        if (otherList == null) {
-            throw new EmptyArrayException("The list is empty");
-        }
+        validateEmptyOtherList(otherList);
         String[] otherStringArray = otherList.getAll();
         boolean isEquals = false;
         if (otherStringArray.length == strList.length) {
@@ -239,6 +233,24 @@ public class StringListImpl implements StringList {
         String[] newArray = new String[length];
         System.arraycopy(strList, 0, newArray, 0, length);
         return newArray;
+    }
+
+    private void validateIndex(int index) {
+        if (index < 0 || index > strList.length) {
+            throw new IndexOutOfArrayException("Out of range");
+        }
+    }
+
+    private void validateEmptyArray() {
+        if (strList.length == 0) {
+            throw new EmptyArrayException("The list is empty");
+        }
+    }
+
+    private void validateEmptyOtherList(StringList otherList) {
+        if (otherList == null) {
+            throw new EmptyArrayException("The list is empty");
+        }
     }
 
     public String toString(String[] tempList) {
